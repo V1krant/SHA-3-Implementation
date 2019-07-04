@@ -67,7 +67,7 @@ data = wrap(data,2)
 if len(data) < 288:
 	length = len(data)
 	for d in range(288-length):
-		data.append("00")
+		data = ["00"]+data
 
 def theta(cube):
 	output_block = [[[-1 for xy in range(64)] for xy in range(5)] for xy in range(5)]
@@ -203,22 +203,24 @@ def get_output(ByteState,n=1):
 		output+=ByteState[x]
 	return output
 
-def hash(bs):
+def hash(bs,option):
 	row = getbinary_from_byte_state(bs,len(bs))
 	rounds = int(len(bs)/144)
 	vector = initial_vector
+	list2 = [ 1152, 1088, 833, 576 ]
+	r = list2[option-1]
 	for t in range(rounds):
-		up = xor(row[:1152],vector[:1152],1152)
-		down = vector[1152:]
+		up = xor(row[:r],vector[:r],r)
+		down = vector[r:]
 		inp = up+down
 		cube = getcube(inp)
 		row_out = f(cube)
 		vector = row_out
-		row = row[1152:]
+		row = row[r:]
 	return(byte_state(row_out))
 
-hashed =  hash(data)
-
 option = int(input("Enter 1 for sha3-224\n      2 for sha3-256\n      3 for sha3-384\n      3 for sha3-512\n Your answer : "))
+
+hashed =  hash(data,option)
 
 print("Hashed Input :",get_output(hashed,option))
